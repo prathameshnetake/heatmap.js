@@ -121,6 +121,11 @@ var Heatmap = (function HeatmapClosure() {
       } else {
         return null;
       }
+    },
+    getUniqueValueAt: function(point, radius) {
+      if (this._store.getUniqueValueAt) {
+        return this._store.getUniqueValueAt(point, radius);
+      }
     }
   };
 

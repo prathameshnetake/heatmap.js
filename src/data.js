@@ -8,6 +8,7 @@ var Store = (function StoreClosure() {
     this._max = 1;
     this._xField = config['xField'] || config.defaultXField;
     this._yField = config['yField'] || config.defaultYField;
+    this._idField = config['idField'] || config.defaultIdField;
     this._valueField = config['valueField'] || config.defaultValueField;
 
     if (config["radius"]) {
@@ -22,8 +23,10 @@ var Store = (function StoreClosure() {
     _organiseData: function(dataPoint, forceRender) {
         var x = dataPoint[this._xField];
         var y = dataPoint[this._yField];
+        var id = dataPoint[this._idField] || 1;
         var radi = this._radi;
         var store = this._data;
+        var ids = this._ids;
         var max = this._max;
         var min = this._min;
         var value = dataPoint[this._valueField] || 1;
@@ -40,6 +43,18 @@ var Store = (function StoreClosure() {
         } else {
           store[x][y] += value;
         }
+        // handle ids
+        if (!ids[x]) {
+          ids[x] = [];
+        }
+
+        if (!ids[x][y]) {
+          ids[x][y] = [id];
+        } else {
+          ids[x][y].push(id);
+        }
+
+
         var storedVal = store[x][y];
 
         if (storedVal > max) {
@@ -128,6 +143,7 @@ var Store = (function StoreClosure() {
       // reset data arrays
       this._data = [];
       this._radi = [];
+      this._ids = [];
 
       for(var i = 0; i < pointsLen; i++) {
         this._organiseData(dataPoints[i], false);
@@ -167,9 +183,10 @@ var Store = (function StoreClosure() {
     },
     getData: function() {
       return this._unOrganizeData();
-    }/*,
+    },
+    /*
 
-      TODO: rethink.
+    // TODO: rethink.
 
     getValueAt: function(point) {
       var value;
@@ -206,6 +223,50 @@ var Store = (function StoreClosure() {
       }
       return false;
     }*/
+    getUniqueValueAt: function (point, r) {
+      var value = [];
+      var radius = r || 50;
+      var xCenter = point.x;
+      var yCenter = point.y;
+      var ids = this._ids;
+
+      for (let x = (xCenter - radius); x <= xCenter; x++) {
+        for (let y = yCenter - radius; y <= yCenter; y++) {
+          // we don't have to take the square root, it's slow
+          if ((x - xCenter) * (x - xCenter) + (y - yCenter) * (y - yCenter) <= radius * radius) {
+            xSym = xCenter - (x - xCenter);
+            ySym = yCenter - (y - yCenter);
+            // (x, y), (x, ySym), (xSym , y), (xSym, ySym) are in the circle
+            if (ids[x]) {
+              if (ids[x][y]) {
+                value = value.concat(ids[x][y].filter(function (item) {
+                  return value.indexOf(item) < 0;
+                }));
+              }
+              if (ids[x][ySym]) {
+                value = value.concat(ids[x][ySym].filter(function (item) {
+                  return value.indexOf(item) < 0;
+                }));
+              }
+            }
+            if (ids[xSym]) {
+              if (ids[xSym][y]) {
+                value = value.concat(ids[xSym][y].filter(function (item) {
+                  return value.indexOf(item) < 0;
+                }));
+              }
+              if (ids[xSym][ySym]) {
+                value = value.concat(ids[xSym][ySym].filter(function (item) {
+                  return value.indexOf(item) < 0;
+                }));
+              }
+            }
+
+          }
+        }
+      }
+      return value.length;
+    }
   };
 
 

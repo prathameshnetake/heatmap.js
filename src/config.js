@@ -9,6 +9,7 @@ var HeatmapConfig = {
   defaultBlur: .85,
   defaultXField: 'x',
   defaultYField: 'y',
+  defaultIdField: 'id',
   defaultValueField: 'value', 
   plugins: {}
 };

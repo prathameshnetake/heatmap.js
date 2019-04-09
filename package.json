@@ -8,6 +8,9 @@
     "email": "heatmapjs@patrick-wied.at",
     "url": "https://www.patrick-wied.at/"
   },
+  "scripts": {
+    "grunt": "grunt"
+  },
   "main": "build/heatmap.js",
   "devDependencies": {
     "grunt": ">= 0.4.1",
